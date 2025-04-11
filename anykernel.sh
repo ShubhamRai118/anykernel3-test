@@ -59,30 +59,30 @@ esac
 ui_print " ";
 
 case "$ZIPFILE" in
-  *eff*|*EFF*)
-    if echo "$ZIPFILE" | grep -iq "gpustk"; then
-      ui_print "Efficient CPU + Stock GPU variant detected,"
-      ui_print "Using Efficient CPU + Stock GPU DTB..."
-      mv *effcpu-gpustk-dtb $home/dtb
-      rm *-normal-dtb *-effcpu-dtb *-normal-gpustk-dtb
-    else
-      ui_print "Efficient CPU + Undervolted GPU variant detected,"
+  *-eff*|*-EFF*)
+    if echo "$ZIPFILE" | grep -iq "uv"; then
+      ui_print "Efficient CPU + Undervolted GPU variant detected"
       ui_print "Using Efficient CPU + UV GPU DTB..."
       mv *effcpu-dtb $home/dtb
-      rm *-normal-dtb *-effcpu-gpustk-dtb *-normal-gpustk-dtb
+      rm *normal-dtb *effcpu-gpustk-dtb *normal-gpustk-dtb
+    else
+      ui_print "Efficient CPU + Stock GPU voltage variant detected"
+      ui_print "Using Efficient CPU + Stock GPU DTB..."
+      mv *effcpu-gpustk-dtb $home/dtb
+      rm *normal-dtb *effcpu-dtb *normal-gpustk-dtb
     fi
     ;;
   *)
-    if echo "$ZIPFILE" | grep -iq "gpustk"; then
-      ui_print "Normal CPU + Stock GPU variant detected,"
-      ui_print "Using Normal CPU + Stock GPU DTB..."
-      mv *normal-gpustk-dtb $home/dtb
-      rm *-effcpu-dtb *-normal-dtb *-effcpu-gpustk-dtb
-    else
-      ui_print "Normal CPU + Undervolted GPU variant detected,"
+    if echo "$ZIPFILE" | grep -iq "uv"; then
+      ui_print "Normal CPU + Undervolted GPU variant detected"
       ui_print "Using Normal CPU + UV GPU DTB..."
       mv *normal-dtb $home/dtb
-      rm *-effcpu-dtb *-normal-gpustk-dtb *-effcpu-gpustk-dtb
+      rm *effcpu-dtb *normal-gpustk-dtb *effcpu-gpustk-dtb
+    else
+      ui_print "Normal CPU + Stock GPU voltage variant detected"
+      ui_print "Using Normal CPU + Stock GPU DTB..."
+      mv *normal-gpustk-dtb $home/dtb
+      rm *effcpu-dtb *normal-dtb *effcpu-gpustk-dtb
     fi
     ;;
 esac
