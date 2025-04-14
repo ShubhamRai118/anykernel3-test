@@ -117,24 +117,24 @@ if { [ "$(basename "$ZIPFILE")" = "update.zip" ] || [ "$(basename "$ZIPFILE")" =
     if [ "$CPU_VARIANT" = "eff" ]; then
       if [ "$GPU_VARIANT" = "uv" ]; then
         ui_print "Efficient CPU + Undervolted GPU variant detected"
-        ui_print "Using that DTB...";
+        ui_print "Using that DTB..."
         mv *-effcpu-dtb $home/dtb
         rm -f *-normal-dtb *-effcpu-gpustk-dtb *-normal-gpustk-dtb
       else
         ui_print "Efficient CPU + Stock GPU variant detected"
-        ui_print "Using that DTB...";
+        ui_print "Using that DTB..."
         mv *-effcpu-gpustk-dtb $home/dtb
         rm -f *-normal-dtb *-effcpu-dtb *-normal-gpustk-dtb
       fi
     else
       if [ "$GPU_VARIANT" = "uv" ]; then
         ui_print "Normal CPU + Undervolted GPU variant detected"
-        ui_print "Using that DTB...";
+        ui_print "Using that DTB..."
         mv *-normal-dtb $home/dtb
         rm -f *-effcpu-dtb *-normal-gpustk-dtb *-effcpu-gpustk-dtb
       else
         ui_print "Normal CPU + Stock GPU variant detected"
-        ui_print "Using that DTB...";
+        ui_print "Using that DTB..."
         mv *-normal-gpustk-dtb $home/dtb
         rm -f *-effcpu-dtb *-normal-dtb *-effcpu-gpustk-dtb
       fi
