@@ -36,58 +36,151 @@ set_perm_recursive 0 0 750 750 $ramdisk/*;
 # kernel naming scene
 ui_print " ";
 
-case "$ZIPFILE" in
-  *miui*|*MIUI*)
-    ui_print "MIUI/HyperOS Detected,";
-    ui_print "Using MIUI DTBO... ";
-    mv *-miui-dtbo.img $home/dtbo.img;
-    rm *-aosp-dtbo.img;
-  ;;
-  *ir*|*IR*)
-    ui_print "AOSP-IR DTBO Detected,";
-    ui_print "Using AOSP-IR DTBO... ";
-    ui_print "Using New LOS-IR Implementation... ";
-    mv *-ir-dtbo.img $home/dtbo.img;
-    rm *-miui-dtbo.img;
-  ;;
-  *)
-    ui_print "Default variant detected !!!";
-    ui_print "Using Regular AOSP DTBO... ";
-    ui_print "Using Old-IR Implementation... ";
-    mv *-aosp-dtbo.img $home/dtbo.img;
-    rm *-miui-dtbo.img;
-  ;;
-esac
-ui_print " ";
+# Check if we are using sideload with 'update.zip' or 'package.zip' and if sideload.txt exists
+if { [ "$(basename "$ZIPFILE")" = "update.zip" ] || [ "$(basename "$ZIPFILE")" = "package.zip" ]; }; then
+  ui_print "Detected sideload, using manual configuration..."
+  ui_print " ";
 
-case "$ZIPFILE" in
-  *-eff*|*-EFF*)
-    if echo "$ZIPFILE" | grep -iq "uv"; then
-      ui_print "Efficient CPU + Undervolted GPU variant detected"
-      ui_print "Using Efficient CPU + UV GPU DTB..."
-      mv *-effcpu-dtb $home/dtb
-      rm *-normal-dtb *-effcpu-gpustk-dtb *-normal-gpustk-dtb
+  # Detect .dreamless file and analyze the filename
+  DREAMLESS_FILE=$(find . -type f -name "*.dreamless" | head -n 1)
+
+  if [ -n "$DREAMLESS_FILE" ]; then
+    ui_print "Detected .dreamless file: $DREAMLESS_FILE"
+    ui_print " ";
+    
+    # Extract filename from the .dreamless file and remove the '.dreamless' extension at the top
+    FILE_NAME=$(basename "$DREAMLESS_FILE")
+    FILE_NAME_NO_EXT=$(echo "$FILE_NAME" | sed 's/\.dreamless$//')
+    # Now split the filename without the extension
+    UI_VARIANT=$(echo "$FILE_NAME_NO_EXT" | cut -d'-' -f1)
+    CPU_VARIANT=$(echo "$FILE_NAME_NO_EXT" | cut -d'-' -f2)
+    if [ "$CPU_VARIANT" = "uv" ]; then
+      GPU_VARIANT="$CPU_VARIANT"
+      CPU_VARIANT=""  # blank it
     else
-      ui_print "Efficient CPU + Stock GPU voltage variant detected"
-      ui_print "Using Efficient CPU + Stock GPU DTB..."
-      mv *-effcpu-gpustk-dtb $home/dtb
-      rm *-normal-dtb *-effcpu-dtb *-normal-gpustk-dtb
+      GPU_VARIANT=$(echo "$FILE_NAME_NO_EXT" | cut -d'-' -f3)
     fi
-    ;;
-  *)
-    if echo "$ZIPFILE" | grep -iq "uv"; then
-      ui_print "Normal CPU + Undervolted GPU variant detected"
-      ui_print "Using Normal CPU + UV GPU DTB..."
-      mv *-normal-dtb $home/dtb
-      rm *-effcpu-dtb *-normal-gpustk-dtb *-effcpu-gpustk-dtb
+    
+
+    # Log the parsed variants
+    ui_print "UI variant: $UI_VARIANT"
+    ui_print "CPU variant: $CPU_VARIANT"
+    ui_print "GPU variant: $GPU_VARIANT"
+    ui_print " ";
+
+    # Handle UI variant (AOSP or MIUI)
+    case "$UI_VARIANT" in
+      miui)
+        ui_print "MIUI/HyperOS detected, using MIUI DTBO..."
+        mv *-miui-dtbo.img $home/dtbo.img
+        rm -f *-aosp-dtbo.img *-ir-dtbo.img
+        ;;
+      aosp)
+        ui_print "AOSP detected, using AOSP DTBO..."
+        ui_print "Using Old-IR Implementation..."
+        mv *-aosp-dtbo.img $home/dtbo.img
+        rm -f *-miui-dtbo.img *-ir-dtbo.img
+        ;;
+      ir)
+        ui_print "AOSP-IR detected, using AOSP-IR DTBO..."
+        ui_print "Using New LOS-IR Implementation..."
+        mv *-ir-dtbo.img $home/dtbo.img
+        rm -f *-miui-dtbo.img *-aosp-dtbo.img
+        ;;
+      *)
+        abort "ERROR!!! Invalid or missing 'ui=' in .dreamless file"
+        ;;
+    esac
+    ui_print " ";
+
+    # Handle CPU and GPU variants (Efficient CPU with UV, etc.)
+    if [ "$CPU_VARIANT" = "eff" ]; then
+      if [ "$GPU_VARIANT" = "uv" ]; then
+        ui_print "Efficient CPU + Undervolted GPU variant detected"
+        ui_print "Using that DTB..."
+        mv *-effcpu-dtb $home/dtb
+        rm -f *-normal-dtb *-effcpu-gpustk-dtb *-normal-gpustk-dtb
+      else
+        ui_print "Efficient CPU + Stock GPU variant detected"
+        ui_print "Using that DTB..."
+        mv *-effcpu-gpustk-dtb $home/dtb
+        rm -f *-normal-dtb *-effcpu-dtb *-normal-gpustk-dtb
+      fi
     else
-      ui_print "Normal CPU + Stock GPU voltage variant detected"
-      ui_print "Using Normal CPU + Stock GPU DTB..."
-      mv *-normal-gpustk-dtb $home/dtb
-      rm *-effcpu-dtb *-normal-dtb *-effcpu-gpustk-dtb
+      if [ "$GPU_VARIANT" = "uv" ]; then
+        ui_print "Normal CPU + Undervolted GPU variant detected"
+        ui_print "Using that DTB..."
+        mv *-normal-dtb $home/dtb
+        rm -f *-effcpu-dtb *-normal-gpustk-dtb *-effcpu-gpustk-dtb
+      else
+        ui_print "Normal CPU + Stock GPU variant detected"
+        ui_print "Using that DTB..."
+        mv *-normal-gpustk-dtb $home/dtb
+        rm -f *-effcpu-dtb *-normal-dtb *-effcpu-gpustk-dtb
+      fi
     fi
+
+    # Optionally delete .dreamless file after processing (clean-up)
+    rm -f "$DREAMLESS_FILE"
+  else
+    abort "ERROR!!! No .dreamless file found in zip."
+  fi
+  
+else
+
+  case "$ZIPFILE" in
+    *miui*|*MIUI*)
+      ui_print "MIUI/HyperOS Detected,";
+      ui_print "Using MIUI DTBO... ";
+      mv *-miui-dtbo.img $home/dtbo.img;
+      rm *-aosp-dtbo.img;
     ;;
-esac
+    *ir*|*IR*)
+      ui_print "AOSP-IR DTBO Detected,";
+      ui_print "Using AOSP-IR DTBO... ";
+      ui_print "Using New LOS-IR Implementation... ";
+      mv *-ir-dtbo.img $home/dtbo.img;
+      rm *-miui-dtbo.img;
+    ;;
+    *)
+      ui_print "Default variant detected !!!";
+      ui_print "Using Regular AOSP DTBO... ";
+      ui_print "Using Old-IR Implementation... ";
+      mv *-aosp-dtbo.img $home/dtbo.img;
+      rm *-miui-dtbo.img;
+    ;;
+  esac
+  ui_print " ";
+
+  case "$ZIPFILE" in
+    *-eff*|*-EFF*)
+      if echo "$ZIPFILE" | grep -iq "uv"; then
+        ui_print "Efficient CPU + Undervolted GPU variant detected"
+        ui_print "Using Efficient CPU + UV GPU DTB..."
+        mv *-effcpu-dtb $home/dtb
+        rm *-normal-dtb *-effcpu-gpustk-dtb *-normal-gpustk-dtb
+      else
+        ui_print "Efficient CPU + Stock GPU voltage variant detected"
+        ui_print "Using Efficient CPU + Stock GPU DTB..."
+        mv *-effcpu-gpustk-dtb $home/dtb
+        rm *-normal-dtb *-effcpu-dtb *-normal-gpustk-dtb
+      fi
+      ;;
+    *)
+      if echo "$ZIPFILE" | grep -iq "uv"; then
+        ui_print "Normal CPU + Undervolted GPU variant detected"
+        ui_print "Using Normal CPU + UV GPU DTB..."
+        mv *-normal-dtb $home/dtb
+        rm *-effcpu-dtb *-normal-gpustk-dtb *-effcpu-gpustk-dtb
+      else
+        ui_print "Normal CPU + Stock GPU voltage variant detected"
+        ui_print "Using Normal CPU + Stock GPU DTB..."
+        mv *-normal-gpustk-dtb $home/dtb
+        rm *-effcpu-dtb *-normal-dtb *-effcpu-gpustk-dtb
+      fi
+      ;;
+  esac
+fi
 
 ## AnyKernel install
 dump_boot;
