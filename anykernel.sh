@@ -43,15 +43,17 @@ case "$ZIPFILE" in
     mv *-miui-dtbo.img $home/dtbo.img;
     rm *-aosp-dtbo.img;
   ;;
-  *aosp*|*AOSP*)
-    ui_print "AOSP DTBO Detected,";
-    ui_print "Using AOSP DTBO... ";
-    mv *-aosp-dtbo.img $home/dtbo.img;
+  *ir*|*IR*)
+    ui_print "AOSP-IR DTBO Detected,";
+    ui_print "Using AOSP-IR DTBO... ";
+    ui_print "Using New LOS-IR Implementation... ";
+    mv *-ir-dtbo.img $home/dtbo.img;
     rm *-miui-dtbo.img;
   ;;
   *)
-    ui_print "Variant is not specified !!!";
-    ui_print "Using AOSP DTBO... ";
+    ui_print "Default variant detected !!!";
+    ui_print "Using Regular AOSP DTBO... ";
+    ui_print "Using Old-IR Implementation... ";
     mv *-aosp-dtbo.img $home/dtbo.img;
     rm *-miui-dtbo.img;
   ;;
