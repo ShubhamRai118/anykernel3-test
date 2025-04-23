@@ -106,11 +106,13 @@ if { [ "$(basename "$ZIPFILE")" = "update.zip" ] || [ "$(basename "$ZIPFILE")" =
         ;;
       aosp)
         ui_print "AOSP detected, using AOSP DTBO..."
+        ui_print "Using Old-IR Implementation..."
         mv *-aosp-dtbo.img $home/dtbo.img
         rm -f *-miui-dtbo.img *-ir-dtbo.img
         ;;
       ir)
-        ui_print "AOSP detected, using AOSP DTBO..."
+        ui_print "AOSP-IR detected, using AOSP-IR DTBO..."
+        ui_print "Using New LOS-IR Implementation..."
         mv *-ir-dtbo.img $home/dtbo.img
         rm -f *-miui-dtbo.img *-aosp-dtbo.img
         ;;
@@ -190,12 +192,14 @@ else
     *ir*|*IR*)
       ui_print "AOSP-IR DTBO Detected,";
       ui_print "Using AOSP-IR DTBO... ";
+      ui_print "Using New LOS-IR Implementation... ";
       mv *-ir-dtbo.img $home/dtbo.img;
       rm *-miui-dtbo.img;
     ;;
     *)
-      ui_print "Variant is not specified !!!";
-      ui_print "Using AOSP DTBO... ";
+      ui_print "Default variant detected !!!";
+      ui_print "Using Regular AOSP DTBO... ";
+      ui_print "Using Old-IR Implementation... ";
       mv *-aosp-dtbo.img $home/dtbo.img;
       rm *-miui-dtbo.img;
     ;;
