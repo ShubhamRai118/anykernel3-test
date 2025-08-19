@@ -78,17 +78,15 @@ if { [ "$(basename "$ZIPFILE")" = "update.zip" ] || [ "$(basename "$ZIPFILE")" =
         ui_print "You're using alioth stock battery variant"
         ui_print "Performing necessary DTBO renaming..."
         mv alioth-stock-dtbo-aosp.img alioth-aosp-dtbo.img 
-        mv alioth-stock-dtbo-ir.img alioth-ir-dtbo.img
         mv alioth-stock-dtbo-miui.img alioth-miui-dtbo.img
-        rm -f alioth-j3s-dtbo-aosp.img alioth-j3s-dtbo-miui.img alioth-j3s-dtbo-ir.img
+        rm -f alioth-j3s-dtbo-aosp.img alioth-j3s-dtbo-miui.img
         ;;
       j3s)
         ui_print "You're using 5000 mAh battery variant"
         ui_print "Performing necessary DTBO renaming..."
         mv alioth-j3s-dtbo-aosp.img alioth-aosp-dtbo.img
-        mv alioth-j3s-dtbo-ir.img alioth-ir-dtbo.img
         mv alioth-j3s-dtbo-miui.img alioth-miui-dtbo.img
-        rm -f alioth-stock-dtbo-aosp.img alioth-stock-dtbo-miui.img alioth-stock-dtbo-ir.img
+        rm -f alioth-stock-dtbo-aosp.img alioth-stock-dtbo-miui.img
         ;;
       *)
         ui_print "Please rename .dreamless file properly"
@@ -102,19 +100,12 @@ if { [ "$(basename "$ZIPFILE")" = "update.zip" ] || [ "$(basename "$ZIPFILE")" =
       miui)
         ui_print "MIUI/HyperOS detected, using MIUI DTBO..."
         mv *-miui-dtbo.img $home/dtbo.img
-        rm -f *-aosp-dtbo.img *-ir-dtbo.img
+        rm -f *-aosp-dtbo.img
         ;;
       aosp)
         ui_print "AOSP detected, using AOSP DTBO..."
-        ui_print "Using Old-IR Implementation..."
         mv *-aosp-dtbo.img $home/dtbo.img
-        rm -f *-miui-dtbo.img *-ir-dtbo.img
-        ;;
-      ir)
-        ui_print "AOSP-IR detected, using AOSP-IR DTBO..."
-        ui_print "Using New LOS-IR Implementation..."
-        mv *-ir-dtbo.img $home/dtbo.img
-        rm -f *-miui-dtbo.img *-aosp-dtbo.img
+        rm -f *-miui-dtbo.img
         ;;
       *)
         abort "ERROR!!! Invalid or missing 'ui=' in .dreamless file"
@@ -162,17 +153,15 @@ else
       ui_print "You're using alioth stock battery variant"
       ui_print "Performing necessary DTBO renaming..."
       mv alioth-stock-dtbo-aosp.img alioth-aosp-dtbo.img
-      mv alioth-stock-dtbo-ir.img alioth-ir-dtbo.img
       mv alioth-stock-dtbo-miui.img alioth-miui-dtbo.img
-      rm -f alioth-j3s-dtbo-aosp.img alioth-j3s-dtbo-miui.img alioth-j3s-dtbo-ir.img
+      rm -f alioth-j3s-dtbo-aosp.img alioth-j3s-dtbo-miui.img
       ;;
     *-j3s*|*-J3S*)
       ui_print "You're using 5000 mAh battery variant"
       ui_print "Performing necessary DTBO renaming..."
       mv alioth-j3s-dtbo-aosp.img alioth-aosp-dtbo.img
-      mv alioth-j3s-dtbo-ir.img alioth-ir-dtbo.img
       mv alioth-j3s-dtbo-miui.img alioth-miui-dtbo.img
-      rm -f alioth-stock-dtbo-aosp.img alioth-stock-dtbo-miui.img alioth-stock-dtbo-ir.img
+      rm -f alioth-stock-dtbo-aosp.img alioth-stock-dtbo-miui.img
       ;;
     *)
       ui_print "ERROR!!!, Battery variant not detected!"
@@ -189,17 +178,9 @@ else
       mv *-miui-dtbo.img $home/dtbo.img;
       rm *-aosp-dtbo.img;
     ;;
-    *ir*|*IR*)
-      ui_print "AOSP-IR DTBO Detected,";
-      ui_print "Using AOSP-IR DTBO... ";
-      ui_print "Using New LOS-IR Implementation... ";
-      mv *-ir-dtbo.img $home/dtbo.img;
-      rm *-miui-dtbo.img;
-    ;;
     *)
       ui_print "Default variant detected !!!";
       ui_print "Using Regular AOSP DTBO... ";
-      ui_print "Using Old-IR Implementation... ";
       mv *-aosp-dtbo.img $home/dtbo.img;
       rm *-miui-dtbo.img;
     ;;
