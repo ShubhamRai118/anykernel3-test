@@ -171,20 +171,45 @@ else
   esac
   ui_print " ";
 
-  case "$ZIPFILE" in
-    *miui*|*MIUI*)
-      ui_print "MIUI/HyperOS Detected,";
-      ui_print "Using MIUI DTBO... ";
-      mv *-miui-dtbo.img $home/dtbo.img;
-      rm *-aosp-dtbo.img;
-    ;;
-    *)
-      ui_print "Default variant detected !!!";
-      ui_print "Using Regular AOSP DTBO... ";
-      mv *-aosp-dtbo.img $home/dtbo.img;
-      rm *-miui-dtbo.img;
+  # Automatic MIUI/HyperOS detection
+  region="$(file_getprop /vendor/build.prop "ro.vendor.miui.build.region")"
+  if [ -z "$region" ]; then
+    region="$(file_getprop /product/etc/build.prop "ro.miui.build.region")"
+  fi
+
+  is_miui=0
+  is_miui_detected=0
+  # Check the region
+  case "$region" in
+    cn|in|ru|id|eu|tr|tw|gb|global|mx|jp|kr|lm|cl|mi)
+    is_miui=1
+    is_miui_detected=1
     ;;
   esac
+
+  # Check zip name
+  case "${ZIPFILE}" in
+    *miui*|*MIUI*|*hyperos*|*HYPEROS*)
+    is_miui=1
+    ;;
+  esac
+
+  if [ "$is_miui" -eq 1 ]; then
+    if [ "$is_miui_detected" -eq 1 ]; then
+      ui_print "MIUI/HyperOS Detected Automatically,"
+      ui_print "Using MIUI DTBO... "
+    else
+      ui_print "MIUI/HyperOS Detected from ZIP name,"
+      ui_print "Using MIUI DTBO... "
+    fi
+    mv *-miui-dtbo.img "$home/dtbo.img"
+    rm -f *-aosp-dtbo.img
+  else
+    ui_print "Default variant detected !!!"
+    ui_print "Using Regular AOSP DTBO... "
+    mv *-aosp-dtbo.img "$home/dtbo.img"
+    rm -f *-miui-dtbo.img
+  fi
   ui_print " ";
 
   case "$ZIPFILE" in
