@@ -61,7 +61,11 @@ if { [ "$(basename "$ZIPFILE")" = "update.zip" ] || [ "$(basename "$ZIPFILE")" =
     else
       GPU_VARIANT=$(echo "$FILE_NAME_NO_EXT" | cut -d'-' -f3)
     fi
-    
+
+    # Fallback for removed -ir variant
+    if [ "$UI_VARIANT" = "ir" ]; then
+      UI_VARIANT="aosp"
+    fi
 
     # Log the parsed variants
     ui_print "UI variant: $UI_VARIANT"
